@@ -25,7 +25,7 @@ fi
 while getopts 'i:n:m: vr' opt; do
 	case $opt in
 		m)	MUNICIPIO=$OPTARG						
-			ID=$(jq -r ".root.element[] | select (.municipio==\"${MUNICIPIO}\") | .id" aemet.json)			
+			ID=$(jq -r ".root.element[] | select (.municipio==\"${MUNICIPIO}\") | .id" /var/lib/$pkgname/aemet.json)			
 			if [ -z "$ID" ];
 			then
 				echo "ERROR: No se ha podido encontrar el municipio"
