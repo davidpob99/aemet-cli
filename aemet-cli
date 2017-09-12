@@ -1,0 +1,326 @@
+#!/bin/bash
+
+VERSION="1.0"
+URL="http://www.aemet.es/xml/municipios/localidad_"
+XML=".xml"
+
+echo -e "Copyright 2017 David Población Criado"
+echo -e "Apache License, Version 2.0\n"
+
+if [ ! -d "$HOME/.aemet-cli/" ]; then
+	mkdir $HOME/.aemet-cli/
+fi
+
+if command -v xmllint >/dev/null 2>&1 ; then
+    :    
+else
+    echo "ERROR: xmllint not found"
+fi
+if command -v curl >/dev/null 2>&1 ; then
+    :  
+else
+    echo "ERROR: curl not found"
+fi
+
+while getopts 'i:n:m: vr' opt; do
+	case $opt in
+		m)	MUNICIPIO=$OPTARG						
+			ID=$(jq -r ".root.element[] | select (.municipio==\"${MUNICIPIO}\") | .id" aemet.json)			
+			if [ -z "$ID" ];
+			then
+				echo "ERROR: No se ha podido encontrar el municipio"
+				exit 0
+			fi
+			if [ -z "$NUMERO_DIAS" ];
+			then
+				NUMERO_DIAS=7
+			fi
+			if (( "${#ID}"==4 ));
+			then
+				ID=0$ID
+			fi
+			DATA=$(curl -s -G $URL$ID$XML -o $HOME/.aemet-cli/$ID.xml)
+			PRODUCTOR=$(xmllint --xpath "string(/root/origen/productor)" $HOME/.aemet-cli/$ID.xml)
+			WEB=$(xmllint --xpath "string(/root/origen/web)" $HOME/.aemet-cli/$ID.xml)
+			LOCALIDAD=$(xmllint --xpath "string(/root/nombre)" $HOME/.aemet-cli/$ID.xml)
+			PROVINCIA=$(xmllint --xpath "string(/root/provincia)" $HOME/.aemet-cli/$ID.xml)
+
+			echo "Fuente de los datos: "$PRODUCTOR
+			echo "Previsión de:" $LOCALIDAD, $PROVINCIA
+			
+			C_DIA=$(xmllint --xpath "count(/root/prediccion/dia)" $HOME/.aemet-cli/$ID.xml)
+			
+			for (( i=1; i <= $NUMERO_DIAS; i++ )); do 
+				FECHA=$(xmllint --xpath "string(/root/prediccion/dia[$i]/@fecha)" $HOME/.aemet-cli/$ID.xml)
+				echo
+				echo "-->"$FECHA
+				echo				
+					UV_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/uv_max)" $HOME/.aemet-cli/$ID.xml)
+				echo "· Indice ultravioleta máximo:" $UV_MAX				 
+					T_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/maxima)" $HOME/.aemet-cli/$ID.xml)
+					T_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Temperaturas:" Máxima: $T_MAX ºC. Mínima: $T_MIN ºC
+					S_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/maxima)" $HOME/.aemet-cli/$ID.xml)
+					S_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Sensación térmica:" Máxima: $S_MAX ºC. Mínima: $S_MIN ºC
+					H_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/maxima)" $HOME/.aemet-cli/$ID.xml)
+					H_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Humedad relativa:" Máxima: $H_MAX %. Mínima: $H_MIN %
+					C_T=$(xmllint --xpath "count(/root/prediccion/dia[$i]/estado_cielo)" $HOME/.aemet-cli/$ID.xml)
+					printf "\n%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n" "Horas" "Cielo" "Temp." "Sensación" "P. precip." "Humedad" "Viento" "Direc." "Racha máx." "Cota nieve"
+
+					if (( $i<=2 ));
+					then
+						j=4
+						
+					fi
+					if (( $i==3 ));
+					then
+						j=2
+						
+					fi
+					if (( $i==4 ));
+					then
+						j=2
+						
+					fi
+					if (( $i>4 ));
+					then
+						j=1
+						
+					fi					 
+				for ((j=$j; j <= $C_T; j++ )); do
+					if (( $j>=4 ));
+					then
+						h=$(expr $j - 3 )
+					fi					
+					if (( $j<3 ));
+					then
+						h=1						
+					fi	
+				
+					TV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/dato[$h])" $HOME/.aemet-cli/$ID.xml)			
+
+					if [ -z "$TV" ];
+					then
+						TV="-"
+					fi	
+					SV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/dato[$h])" $HOME/.aemet-cli/$ID.xml)
+					
+					
+					if [ -z "$SV" ];
+					then
+						SV="-"
+					fi
+					HV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/dato[$h])" $HOME/.aemet-cli/$ID.xml)
+					
+					
+					if [ -z "$HV" ];
+					then
+						HV="-"
+					fi
+					PPP=$(xmllint --xpath "string(/root/prediccion/dia[$i]/prob_precipitacion[$j]/@periodo)" $HOME/.aemet-cli/$ID.xml)
+					PP=$(xmllint --xpath "string(/root/prediccion/dia[$i]/prob_precipitacion[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$PPP" ];
+					then
+						PPP="00-24"
+					fi
+					if [ -z "$PP" ];
+					then
+						PP="-"
+					fi	
+					RM=$(xmllint --xpath "string(/root/prediccion/dia[$i]/racha_max[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$RM" ];
+					then
+						RM="-"
+					fi			
+					CN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/cota_nieve_prov[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$CN" ];
+					then
+						CN="-"
+					fi
+					EC=$(xmllint --xpath "string(/root/prediccion/dia[$i]/estado_cielo[$j]/@descripcion)" $HOME/.aemet-cli/$ID.xml)				
+					
+					if [ -z "$EC" ];
+					then
+						EC="-"
+					fi
+					if [ "$EC" == "Intervalos nubosos" ];
+					then
+						EC="Int. nubosos"
+					else
+						:
+					fi
+					VV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/viento[$j]/velocidad)" $HOME/.aemet-cli/$ID.xml)
+					VD=$(xmllint --xpath "string(/root/prediccion/dia[$i]/viento[$j]/direccion)" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$VV" ];
+					then
+						VV="-"
+					fi
+					if [ -z "$VD" ];
+					then
+						VD="-"
+					fi	
+					printf "%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n" $PPP "$EC" "$TVºC" "$SVºC" "$PP%" "$HV%" "$VV km/h" "$VD" "$RM km/h" "$CN m"
+				done
+			done;;
+
+
+		n)	NUMERO_DIAS=$OPTARG
+			if (($NUMERO_DIAS > 7)) ; then
+				echo "ERROR: El número de días no puede ser mayor de 7." 
+			fi
+			if (($NUMERO_DIAS < 1)) ; then
+				echo "ERROR: El número de días nopuede ser menor de 1." 
+			fi;;
+
+		i) 	if [ -z "$NUMERO_DIAS" ];
+			then
+				NUMERO_DIAS=7
+			fi
+			if [ -z "$ID" ];
+			then
+				ID=$OPTARG
+			else
+				:
+			fi
+			DATA=$(curl -s -G $URL$ID$XML -o $HOME/.aemet-cli/$ID.xml)
+			PRODUCTOR=$(xmllint --xpath "string(/root/origen/productor)" $HOME/.aemet-cli/$ID.xml)
+			WEB=$(xmllint --xpath "string(/root/origen/web)" $HOME/.aemet-cli/$ID.xml)
+			LOCALIDAD=$(xmllint --xpath "string(/root/nombre)" $HOME/.aemet-cli/$ID.xml)
+			PROVINCIA=$(xmllint --xpath "string(/root/provincia)" $HOME/.aemet-cli/$ID.xml)
+
+			echo "Fuente de los datos: "$PRODUCTOR
+			echo "Previsión de:" $LOCALIDAD, $PROVINCIA
+			
+			C_DIA=$(xmllint --xpath "count(/root/prediccion/dia)" $HOME/.aemet-cli/$ID.xml)
+			
+			for (( i=1; i <= $NUMERO_DIAS; i++ )); do 
+				FECHA=$(xmllint --xpath "string(/root/prediccion/dia[$i]/@fecha)" $HOME/.aemet-cli/$ID.xml)
+				echo
+				echo "-->"$FECHA
+				echo				
+					UV_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/uv_max)" $HOME/.aemet-cli/$ID.xml)
+				echo "· Indice ultravioleta máximo:" $UV_MAX				 
+					T_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/maxima)" $HOME/.aemet-cli/$ID.xml)
+					T_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Temperaturas:" Máxima: $T_MAX ºC. Mínima: $T_MIN ºC
+					S_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/maxima)" $HOME/.aemet-cli/$ID.xml)
+					S_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Sensación térmica:" Máxima: $S_MAX ºC. Mínima: $S_MIN ºC
+					H_MAX=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/maxima)" $HOME/.aemet-cli/$ID.xml)
+					H_MIN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/minima)" $HOME/.aemet-cli/$ID.xml)
+					echo "· Humedad relativa:" Máxima: $H_MAX %. Mínima: $H_MIN %
+					C_T=$(xmllint --xpath "count(/root/prediccion/dia[$i]/estado_cielo)" $HOME/.aemet-cli/$ID.xml)
+					printf "\n%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n" "Horas" "Cielo" "Temp." "Sensación" "P. precip." "Humedad" "Viento" "Direc." "Racha máx." "Cota nieve"
+
+					if (( $i<=2 ));
+					then
+						j=4
+						
+					fi
+					if (( $i==3 ));
+					then
+						j=2
+						
+					fi
+					if (( $i==4 ));
+					then
+						j=2
+						
+					fi
+					if (( $i>4 ));
+					then
+						j=1
+						
+					fi
+					 
+				for (( j=$j; j <= $C_T; j++ )); do
+					if (( $j>=4 ));
+					then
+						h=$(expr $j - 3 )
+					fi					
+					if (( $j<3 ));
+					then
+						h=1						
+					fi	
+				
+					TV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/temperatura/dato[$h])" $HOME/.aemet-cli/$ID.xml)			
+
+					if [ -z "$TV" ];
+					then
+						TV="-"
+					fi	
+					SV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/sens_termica/dato[$h])" $HOME/.aemet-cli/$ID.xml)
+					
+					
+					if [ -z "$SV" ];
+					then
+						SV="-"
+					fi
+					HV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/humedad_relativa/dato[$h])" $HOME/.aemet-cli/$ID.xml)
+					
+					
+					if [ -z "$HV" ];
+					then
+						HV="-"
+					fi
+					PPP=$(xmllint --xpath "string(/root/prediccion/dia[$i]/prob_precipitacion[$j]/@periodo)" $HOME/.aemet-cli/$ID.xml)
+					PP=$(xmllint --xpath "string(/root/prediccion/dia[$i]/prob_precipitacion[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$PPP" ];
+					then
+						PPP="00-24"
+					fi
+					if [ -z "$PP" ];
+					then
+						PP="-"
+					fi	
+					RM=$(xmllint --xpath "string(/root/prediccion/dia[$i]/racha_max[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$RM" ];
+					then
+						RM="-"
+					fi			
+					CN=$(xmllint --xpath "string(/root/prediccion/dia[$i]/cota_nieve_prov[$j])" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$CN" ];
+					then
+						CN="-"
+					fi
+					EC=$(xmllint --xpath "string(/root/prediccion/dia[$i]/estado_cielo[$j]/@descripcion)" $HOME/.aemet-cli/$ID.xml)				
+					
+					if [ -z "$EC" ];
+					then
+						EC="-"
+					fi
+					if [ "$EC" == "Intervalos nubosos" ];
+					then
+						EC="Int. nubosos"
+					else
+						:
+					fi
+					VV=$(xmllint --xpath "string(/root/prediccion/dia[$i]/viento[$j]/velocidad)" $HOME/.aemet-cli/$ID.xml)
+					VD=$(xmllint --xpath "string(/root/prediccion/dia[$i]/viento[$j]/direccion)" $HOME/.aemet-cli/$ID.xml)
+					
+					if [ -z "$VV" ];
+					then
+						VV="-"
+					fi
+					if [ -z "$VD" ];
+					then
+						VD="-"
+					fi	
+					printf "%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n" $PPP "$EC" "$TVºC" "$SVºC" "$PP%" "$HV%" "$VV km/h" "$VD" "$RM km/h" "$CN m"
+				done
+			done;;
+		
+		v)	echo "aemet-cli-$VERSION";;
+		r)	rm 	$HOME/.aemet-cli/*.*;;
+		*) 	exit 1;;
+	esac
+done

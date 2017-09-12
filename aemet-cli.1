@@ -1,0 +1,51 @@
+.\" Manpage for aemet-cli.
+.TH man 1 "12 Sep 2017" "1.0" "aemet-cli"
+.SH NOMBRE
+aemet-cli
+.SH SINOPSIS
+aemet-cli <opciones secundarias>  [opciones principales]
+.SH DESCRIPTION
+aemet-cli es una aplicación de terminal que permite obtener las previsiones del tiempo meteorológico en España. Usa datos abiertos de la Agencia Estatal de Meteorología (AEMET) del Gobierno de España.
+.SH OCIONES PRINCIPALES
+
+.B -m [municipio]
+
+Busca la previsión del municipio indicado. Si el nombre del municipio es más de una palabra, expresarlo entre comillas simples. Por ejemplo: 'Aranda de Duero'.
+
+.B -i [id]
+
+Busca la previsión del municipio con el id indicado. El id se puede obtener en la página de la AEMET (http://www.aemet.es), buscando la previsión del municipio deseado y copiando los dígitos que aparecen despues de los caracteres "id".
+
+Ejemplos:
+Valladolid: 
+web: http://www.aemet.es/es/eltiempo/prediccion/municipios/valladolid-id47186
+id: 47186
+
+Madrid:
+web: http://www.aemet.es/es/eltiempo/prediccion/municipios/madrid-id28079
+id: 28079
+
+Barcelona:
+web: http://www.aemet.es/es/eltiempo/prediccion/municipios/barcelona-id08019
+id: 08019
+
+EN EL TERMINAL HAY QUE PONER SOLO EL ID, NO LA WEB
+
+.B -v
+Muestra el número de la versión
+
+.B -r
+Borrar el caché guardado en $HOME/.aemet-cli.
+
+.SH OPCIONES SECUNDARIAS
+
+.B -n [días]
+
+Especifica un número (entre 1 y 7), que señala los días de los que se quiere obtener la previsión (contados desde el día actual)
+
+.SH VER TAMBIÉN
+curl, libxml2, jq
+.SH ERRORES
+No hay errores conocidos.
+.SH AUTHOR
+David Población Criado (davidpblcrd@protonmail.com)
