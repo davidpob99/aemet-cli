@@ -7,24 +7,51 @@
 
 aemet-cli es una aplicación de terminal que permite obtener las previsiones del tiempo meteorológico en España. Usa datos abiertos de la Agencia Estatal de Meteorología (AEMET) del Gobierno de España.
 
-# Instalación
-## Ubuntu y derivados: 
-En progreso..
+## Instalación
+### Debian y derivados
 
-## Arch Linux
+`sudo apt-get install libxml2-utils jq curl git`
+`git clone https://github.com/davidpob99/aemet-cli`
+`cd aemet-cli`
+`chmod -x INSTALL`
+`sudo sh INSTALL`
+
+### Arch Linux
 [AUR](https://aur.archlinux.org/packages/aemet-cli/)
 
-## Debian y derivados
+### Windows
 
-En progreso..
+Probablemente se pueda ejecutar en el [subsistema Linux en Windows](https://blogs.msdn.microsoft.com/commandline/learn-about-bash-on-windows-subsystem-for-linux/)
 
-# Ejemplos
+### Android
+1. Descargar [Termux](https://play.google.com/store/apps/details?id=com.termux)
+2. `apt update && apt upgrade`
+3. `pkg install git jq curl libxml2-utils`
+4. `git clone https://github.com/davidpob99/aemet-cli`
+5. `cd aemet-cli`
+6. `chmod -x INSTALL`
+7. `sudo sh INSTALL`
+
+## Desinstalación
+### Debian y derivados
+
+`git clone https://github.com/davidpob99/aemet-cli`
+`cd aemet-cli`
+`chmod -x UNINSTALL`
+`sudo sh UNINSTALL`
+
+### Arch Linux
+
+`sudo pacman -Rs aemet-cli`
+
+## Ejemplos
+
 Ver la previsión de los 7 días siguientes en Salamanca: `aemet-cli -m Salamanca`
 
 Ver la previsión solo del día siguiente en Aranda de Duero: `aemet-cli -n 1 -m 'Aranda de Duero'`
 
 Ver la previsión de los 7 días siguiente sabiendo el id del municipio de Valladolid: `aemet-cli -i 47186`
 
-# Licencia
+## Licencia
 
 Código disponible bajo licencia Apache 2.0.

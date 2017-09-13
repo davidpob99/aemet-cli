@@ -1,0 +1,11 @@
+#!/bin/bash
+
+git clone https://github.com/davidpob99/aemet-cli.git
+cd aemet-cli
+install -Dm755 aemet-cli /usr/bin/aemet-cli
+install -Dm755 aemet.json /var/lib/aemet-cli/aemet.json
+gzip aemet-cli.1
+install -Dm755 aemet-cli.1.gz /usr/share/man/man1/aemet-cli.1.gz
+install -Dm755 LICENSE /usr/share/licenses/aemet-cli/LICENSE
+cd ..
+rm -r aemet-cli

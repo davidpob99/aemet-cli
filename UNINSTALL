@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm /usr/bin/aemet-cli
+rm -r /var/lib/aemet-cli/
+rm /usr/share/man/man1/aemet-cli.1.gz
+rm -r /usr/share/licenses/aemet-cli/
+
