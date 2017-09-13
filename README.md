@@ -7,6 +7,8 @@
 
 aemet-cli es una aplicación de terminal que permite obtener las previsiones del tiempo meteorológico en España. Usa datos abiertos de la Agencia Estatal de Meteorología (AEMET) del Gobierno de España.
 
+![](ejemplo.gif)
+
 ## Instalación
 ### Debian y derivados
 
