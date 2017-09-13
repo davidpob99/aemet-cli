@@ -12,11 +12,11 @@ aemet-cli es una aplicación de terminal que permite obtener las previsiones del
 ## Instalación
 ### Debian y derivados
 
-`sudo apt-get install libxml2-utils jq curl git`
-`git clone https://github.com/davidpob99/aemet-cli`
-`cd aemet-cli`
-`chmod -x INSTALL`
-`sudo sh INSTALL`
+1. `sudo apt-get install libxml2-utils jq curl git`
+2. `git clone https://github.com/davidpob99/aemet-cli`
+3. `cd aemet-cli`
+4. `chmod -x INSTALL`
+5. `sudo sh INSTALL`
 
 ### Arch Linux
 [AUR](https://aur.archlinux.org/packages/aemet-cli/)
@@ -37,10 +37,10 @@ Probablemente se pueda ejecutar en el [subsistema Linux en Windows](https://blog
 ## Desinstalación
 ### Debian y derivados
 
-`git clone https://github.com/davidpob99/aemet-cli`
-`cd aemet-cli`
-`chmod -x UNINSTALL`
-`sudo sh UNINSTALL`
+1. `git clone https://github.com/davidpob99/aemet-cli`
+2. `cd aemet-cli`
+3. `chmod -x UNINSTALL`
+4. `sudo sh UNINSTALL`
 
 ### Arch Linux
 
