@@ -3,7 +3,12 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GRXHT9CGJ4L7G)
 [![Website](https://img.shields.io/website-up-down-green-red/http/shields.io.svg?label=my-website)](https://davidpob99.github.io/aemet-cli/)
-
+                            _              _ _ 
+                           | |            | (_)
+   __ _  ___ _ __ ___   ___| |_ ______ ___| |_ 
+  / _` |/ _ \ '_ ` _ \ / _ \ __|______/ __| | |
+ | (_| |  __/ | | | | |  __/ |_      | (__| | |
+  \__,_|\___|_| |_| |_|\___|\__|      \___|_|_|
 
 aemet-cli es una aplicación de terminal que permite obtener las previsiones del tiempo meteorológico en España. Usa datos abiertos de la Agencia Estatal de Meteorología (AEMET) del Gobierno de España.
 
